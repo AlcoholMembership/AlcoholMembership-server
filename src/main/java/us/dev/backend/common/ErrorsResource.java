@@ -10,5 +10,7 @@ public class ErrorsResource extends Resource<Errors> {
     public ErrorsResource(Errors content, Link...links) {
         super(content, links);
         //add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
+        System.out.println("Test");
+        System.out.println("test2");
     }
 }
