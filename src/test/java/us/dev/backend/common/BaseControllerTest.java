@@ -31,4 +31,5 @@ public class BaseControllerTest {
 
     @Autowired
     protected ModelMapper modelMapper;
+
 }
