@@ -1,4 +1,5 @@
-import static org.junit.jupiter.api.Assertions.*;
+package us.dev.backend.Coupon;
+
 
 class CouponControllerTest {
 

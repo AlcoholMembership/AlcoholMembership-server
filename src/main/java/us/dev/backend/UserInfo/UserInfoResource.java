@@ -1,22 +1,20 @@
-package com.example.demo.events;
+package us.dev.backend.UserInfo;
 
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /*
 * HETEOAS
 * */
-public class EventResource extends Resource<Event> {
+public class UserInfoResource extends Resource<UserInfo> {
 
-    public EventResource(Event event, Link... links) {
-        super(event, links);
+    public UserInfoResource(UserInfo userInfo, Link... links) {
+        super(userInfo, links);
         //add(new Link("http://localhost:8080/api/events/"+event.getId())); 같은 거임.
-        add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
+        add(linkTo(UserInfoController.class).slash(userInfo.getId()).withSelfRel());
 
     }
 

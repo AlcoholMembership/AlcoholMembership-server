@@ -1,19 +1,21 @@
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.runner.RunWith;
+package us.dev.backend.index;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import us.dev.backend.common.BaseControllerTest;
 
-@RunWith(Arquillian.class)
-public class IndexControllerTest {
-    @Deployment
-    public static JavaArchive createDeployment() {
-        return ShrinkWrap.create(JavaArchive.class)
-                .addClass(us.dev.backend.index.IndexController.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+public class IndexControllerTest extends BaseControllerTest {
+
+    @Test
+    public void index() throws Exception{
+        this.mockMvc.perform(get("/api"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.events").exists()
+                )
+        ;
     }
 
 }
