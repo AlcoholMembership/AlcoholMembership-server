@@ -18,10 +18,8 @@ import javax.validation.constraints.NotNull;
  * qrid : 고유 qrcode
  */
 public class UserInfo {
-    @Id @NotNull
-    private String id;
-    @NotNull
-    private String pushToken;
-    @NotNull
+    @Id
     private String qrid;
+    private String id;
+    private String pushToken;
 }
