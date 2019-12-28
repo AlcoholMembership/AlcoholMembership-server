@@ -1,29 +1,23 @@
 package us.dev.backend.Coupon;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode(of = "qrid")
-@Entity
-/**=
- * Qrcode : 고유 qrcode
- * usingTime : 사용 시간
- * location : 장소
- */
-public class Coupon {
-
-    @Id
+@AllArgsConstructor
+@Data
+public class CouponDto {
+    @NotNull
     private String qrid;
+    @NotNull
     private LocalDateTime usingTime;
+    @NotNull
     private String location;
 }
-
