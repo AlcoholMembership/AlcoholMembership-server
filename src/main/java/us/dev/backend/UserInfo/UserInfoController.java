@@ -87,10 +87,10 @@ public class UserInfoController {
         return ResponseEntity.ok(userInfoResource);
     }
 
-    @DeleteMapping("/{qrid}")
-    public ResponseEntity getUserInfo(@PathVariable String qrid) {
-
-    }
+//    @DeleteMapping("/{qrid}")
+//    public ResponseEntity getUserInfo(@PathVariable String qrid) {
+//
+//    }
 
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
