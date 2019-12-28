@@ -55,18 +55,10 @@ public class UserInfoControllerTest extends BaseControllerTest {
                                 linkWithRel("updateUserInfo").description("유저 정보를 변경하는 링크"),
                                 linkWithRel("profile").description("도큐먼트 링크")
                         ),
-                        requestHeaders(
-                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
-                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content_tpye haader")
-                        ),
                         requestFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
                                 fieldWithPath("id").description("SNS로그인을 위한 Token id"),
                                 fieldWithPath("pushToken").description("Push알림을 위한 Token id")
-                        ),
-                        responseHeaders(
-                                headerWithName(HttpHeaders.LOCATION).description("Location header"),
-                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
                         ),
                         relaxedResponseFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
@@ -132,8 +124,21 @@ public class UserInfoControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value(test_userId))
                 .andExpect(jsonPath("_links.self").exists())
-                .andDo(document("updateUserInfo"))
-        ;
+                .andDo(document("updateUserInfo",
+                        links(
+                                linkWithRel("self").description("현재 링크"),
+                                linkWithRel("profile").description("도큐먼트 링크")
+                        ),
+                        requestFields(
+                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+                                fieldWithPath("pushToken").description("Push알림을 위한 Token id")
+                        ),
+                        relaxedResponseFields(
+                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+                                fieldWithPath("pushToken").description("Push알림을 위한 Token id")
+                        )));
     }
 
 
