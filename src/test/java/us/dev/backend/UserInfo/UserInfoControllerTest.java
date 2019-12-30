@@ -8,12 +8,6 @@ import org.springframework.http.MediaType;
 import us.dev.backend.common.BaseControllerTest;
 import us.dev.backend.common.TestDescription;
 
-import javax.print.attribute.standard.Media;
-
-import java.time.LocalDateTime;
-
-import static org.junit.Assert.*;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
