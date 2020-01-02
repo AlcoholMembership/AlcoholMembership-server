@@ -1,9 +1,10 @@
 package us.dev.backend.UserInfo;
 
 import lombok.*;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -20,6 +21,17 @@ import javax.validation.constraints.NotNull;
 public class UserInfo {
     @Id
     private String qrid;
+
     private String id;
+
     private String pushToken;
+
+    private String username;
+
+    private String password;
+
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<UserRole> roles;
 }

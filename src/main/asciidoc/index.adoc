@@ -87,7 +87,7 @@ include::{snippets}/errors/http-response.adoc[]
 [[resources-index-access]]
 === 인덱스 조회
 
-`GET` 요청을 사용하여 인덱스에 접근할 수 있다.
+`GET` 요청을 사용하여 우리가 서비스하는 API들의 인덱스에 접근할 수 있다.
 
 operation::index[snippets='httpie-request,response-body,http-response,links']
 
@@ -108,8 +108,9 @@ operation::createUserInfo[snippets='httpie-request,request-fields,http-request,r
 === 유저정보 조회
 
 `Get` 요청을 사용해서 유저정보 하나를 조회할 수 있다.
+'http://localhost:8080/api/userInfo/{qr_id}'
 
-operation::getUserInfo[snippets='httpie-request,request-fields,http-request,response-fields,http-response,links']
+operation::getUserInfo[snippets='httpie-request,http-request,response-fields,http-response,links']
 
 [[resources-update-userInfo]]
 === 유저정보 수정
