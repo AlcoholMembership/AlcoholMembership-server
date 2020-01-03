@@ -140,7 +140,7 @@ public class UserInfoControllerTest extends BaseControllerTest {
         UserInfo userInfo = UserInfo.builder()
                 .qrid("qr_test_id")
                 .id("login_test_token_id")
-                .pushToken("push_test_token_id")
+                .fcmToken("push_test_token_id")
                 .build();
         return this.userInfoRepository.save(userInfo);
     }

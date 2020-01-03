@@ -22,13 +22,18 @@ public class UserInfo {
     @Id
     private String qrid;
 
+    @GeneratedValue
     private String id;
 
-    private String pushToken;
+    private String fcmToken;
+
+    private String kakaoToken;
 
     private String username;
 
     private String password;
+
+    //kakao token -> qrid를 만드니까
 
 
     @ElementCollection(fetch = FetchType.EAGER)
