@@ -36,7 +36,9 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
     //For Saving Tokens.
     @Autowired
-    TokenStore tokenStore;
+    TokenStore JdbcTokenStore;
+
+
 
     //OAuth2 인증서버 자체의 보안을 설정하는 부분 -> PasswordEncoder를 통한 암호화.
     @Override
@@ -63,6 +65,6 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userInfoService)
-                .tokenStore(tokenStore);
+                .tokenStore(JdbcTokenStore);
     }
 }

@@ -28,6 +28,7 @@ public class JasycriptConfigTest extends BaseControllerTest {
         System.out.println("기존  username :: " + username + " | 변경 username :: " + pbeEnc.encrypt(username));
         System.out.println("기존  password :: " + password + " | 변경 password :: " + pbeEnc.encrypt(password));
         System.out.println();
+
     }
 
 }
