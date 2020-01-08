@@ -49,7 +49,7 @@ public class UserInfoServiceTest {
         UserInfo userInfo = UserInfo.builder()
                 .qrid(qrid)
                 .fcmToken(fcmToek)
-                .kakaoToken(kakaoToken)
+                .kakaoAccessToken(kakaoToken)
                 .password(password)
                 .username(username)
                 .roles(Set.of(UserRole.ADMIN,UserRole.USER))

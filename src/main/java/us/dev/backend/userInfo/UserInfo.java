@@ -25,9 +25,11 @@ public class UserInfo {
 
     private String fcmToken;
 
-    private String kakaoToken;
-
+    private String kakaoAccessToken;
+    private String kakaoRefreshToken;
     private String username;
+    private String nickname;
+    private String profile_photo;
 
     private String password;
 

@@ -1,6 +1,7 @@
 package us.dev.backend.userInfo;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -9,12 +10,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import us.dev.backend.common.ErrorsResource;
+import us.dev.backend.login.KakaoAPI;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 
 @Controller
 @RequestMapping(value = "/api/userInfo", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
@@ -25,6 +30,37 @@ public class UserInfoController {
     public UserInfoController(UserInfoRepository userInfoRepository, ModelMapper modelMapper) {
         this.userInfoRepository = userInfoRepository;
         this.modelMapper = modelMapper;
+    }
+
+    @Autowired
+    KakaoAPI kakaoAPI;
+
+    /* get kakao authorized code */
+    @GetMapping("/login")
+    public ResponseEntity login(@RequestParam("code") String code) {
+        UserInfoDto userInfoDto = kakaoAPI.getAccessToken(code);
+        /* TODO 아래 비어있는 데이터로 나중에 추가해주어야함 */
+        userInfoDto.builder()
+                .qrid("TEMP_QRID")
+                .password("TEMP_PASSWORD")
+                .roles(Set.of(UserRole.USER))
+                .build();
+
+
+        UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
+        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
+
+        /* HATEOAS */
+        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class).slash(newUserInfo.getQrid());
+        URI createdUri = selfLinkBuilder.toUri();
+
+        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
+        userInfoResource.add(linkTo(UserInfoController.class).withRel("getUserInfo"));
+        userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
+
+        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
+        return ResponseEntity.created(createdUri).body(userInfoResource);
+
     }
 
     @PostMapping

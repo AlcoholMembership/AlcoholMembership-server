@@ -41,7 +41,10 @@ public class AppConfig {
                         .password("test_pwd")
                         .username("junseoMo")
                         .fcmToken("test_fcmToken")
-                        .kakaoToken("test_kakaoToken")
+                        .kakaoAccessToken("test_kakaoAccessToken")
+                        .kakaoRefreshToken("test_akakaoRefreshToken")
+                        .nickname("nickname!!!")
+                        .profile_photo("profile_photoPath")
                         .roles(Set.of(UserRole.ADMIN, UserRole.USER))
                         .build();
                 userInfoService.saveUserInfo(userInfo);

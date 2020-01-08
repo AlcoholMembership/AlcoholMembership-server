@@ -31,7 +31,7 @@ public class AuthServerConfigTest extends BaseControllerTest {
                 .password("test_pwd")
                 .username("junseoMo")
                 .fcmToken("test_fcmToken")
-                .kakaoToken("test_kakaoToken")
+                .kakaoAccessToken("test_kakaoToken")
                 .roles(Set.of(UserRole.ADMIN, UserRole.USER))
                 .build();
         this.userInfoService.saveUserInfo(userInfo);
