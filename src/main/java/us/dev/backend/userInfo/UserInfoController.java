@@ -36,29 +36,29 @@ public class UserInfoController {
     KakaoAPI kakaoAPI;
 
     /* get kakao authorized code */
+    //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
     @GetMapping("/login")
     public ResponseEntity login(@RequestParam("code") String code) {
         UserInfoDto userInfoDto = kakaoAPI.getAccessToken(code);
         /* TODO 아래 비어있는 데이터로 나중에 추가해주어야함 */
-        userInfoDto.builder()
-                .qrid("TEMP_QRID")
-                .password("TEMP_PASSWORD")
-                .roles(Set.of(UserRole.USER))
-                .build();
+        userInfoDto.setQrid("TEMP_QRID");
+        userInfoDto.setPassword("TEMP_PASSWORD");
+        userInfoDto.setRoles(Set.of(UserRole.USER));
+
 
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
 
         /* HATEOAS */
-        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class).slash(newUserInfo.getQrid());
+        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
         URI createdUri = selfLinkBuilder.toUri();
 
         UserInfoResource userInfoResource = new UserInfoResource(userInfo);
-        userInfoResource.add(linkTo(UserInfoController.class).withRel("getUserInfo"));
+        userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
         userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
 
-        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
+        userInfoResource.add(new Link("/docs/index.html#resource-Loginkakako").withRel("profile"));
         return ResponseEntity.created(createdUri).body(userInfoResource);
 
     }

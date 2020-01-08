@@ -18,6 +18,8 @@ public class UserInfoDto {
     private String qrid;
     @NotNull
     private String id;
+
+    private String fcmToken;
     @NotNull
     private String kakaoAccessToken;
     @NotNull
