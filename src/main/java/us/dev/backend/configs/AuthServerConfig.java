@@ -1,6 +1,7 @@
 package us.dev.backend.configs;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,15 +41,11 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Autowired
     UserInfoService userInfoService;
 
-//    @Autowired
-//    TokenStore tokenStore;
-
-    //For Saving Tokens.
     @Autowired
-    JdbcTokenStore tokenStore;
+    private TokenStore tokenStore;
 
     @Autowired
-    DataSource dataSource;
+    private DataSource dataSource;
 
 
 
@@ -61,18 +58,23 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
         security.passwordEncoder(passwordEncoder);
     }
 
-    // Client에 대한 정보를 설정하는 부분.
+    /*
+        Client 설정.
+        기기 단의 정보라고 생각하면됨.
+        여기에 설정되어 있는 정보대로,
+        Oauth/token 으로 접속시 Body에 해당 내용을 실어보내게됨.
+        올바르다면 Token을 발급함.
+    */
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         //앱에서 해줘야하는 부분
-        clients.jdbc(dataSource);
-//                clients.inMemory()
-//                        .withClient("clientId")
-//                        .authorizedGrantTypes("password","refresh_token")
-//                        .scopes("read","write")
-//                        .secret(this.passwordEncoder.encode("clientSecret"))
-//                        .accessTokenValiditySeconds(10 * 60)
-//                        .refreshTokenValiditySeconds(6 * 10 * 60);
+                clients.inMemory()
+                        .withClient("clientId")
+                        .authorizedGrantTypes("password","refresh_token")
+                        .scopes("read","write")
+                        .secret(this.passwordEncoder.encode("clientSecret"))
+                        .accessTokenValiditySeconds(10 * 60)
+                        .refreshTokenValiditySeconds(6 * 10 * 60);
     }
 
     //Oauth2서버가 작동하기 위한 EndPoint에 대한 정보를 설정
@@ -82,6 +84,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
                 .userDetailsService(userInfoService)
                 .tokenStore(tokenStore);
     }
+
+
 
 
 }

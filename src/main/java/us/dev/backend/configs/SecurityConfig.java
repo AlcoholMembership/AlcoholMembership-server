@@ -38,10 +38,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    }
 
       //토큰 정보 영속화
-    @Bean
-    public JdbcTokenStore JdbcTokenStore(DataSource dataSource) {
-        return new JdbcTokenStore(dataSource);
-    }
+      @Bean
+      public TokenStore tokenStore(DataSource dataSource) {
+          return new JdbcTokenStore(dataSource);
+      }
 
 
     @Bean
@@ -65,9 +65,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-    //http 통신 Security 설정. 여기서 다해줘야함.
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//
-//    }
 }

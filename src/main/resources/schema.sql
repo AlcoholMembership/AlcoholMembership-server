@@ -20,7 +20,7 @@ create table oauth_client_token (
   client_id VARCHAR(256)
 );
 
-create table oauth_access_token (
+create table if not exists oauth_access_token (
   token_id VARCHAR(256),
   token bytea,
   authentication_id VARCHAR(256),

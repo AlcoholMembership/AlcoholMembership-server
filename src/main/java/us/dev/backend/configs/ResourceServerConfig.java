@@ -17,11 +17,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         API 서버 권한 설정.
      */
 
-//    @Override
-//    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-//        resources.resourceId("userInfo");
-//    }
-
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
@@ -35,19 +30,5 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(new OAuth2AccessDeniedHandler());
-
-//        http
-//                .authorizeRequests()
-//                    .mvcMatchers(HttpMethod.GET, "/api")
-//                        .authenticated()
-//                    .mvcMatchers(HttpMethod.POST, "/api/userInfo/**")
-//                        .permitAll()
-//                    .mvcMatchers(HttpMethod.PUT, "/api/userInfo/**").hasRole("USER")
-//                    .mvcMatchers(HttpMethod.DELETE, "/api/userInfo/**").hasRole("USER")
-//                .anyRequest()
-//                    .permitAll()
-//                .and()
-//                .exceptionHandling()
-//                .accessDeniedHandler(new OAuth2AccessDeniedHandler());
     }
 }

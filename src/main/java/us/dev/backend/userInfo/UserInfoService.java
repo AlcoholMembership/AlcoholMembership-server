@@ -23,6 +23,7 @@ public class UserInfoService implements UserDetailsService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    /* UserInfo를 저장 할 때, 패스워드를 암호화하여 저장함. */
     public UserInfo saveUserInfo(UserInfo userInfo) {
         userInfo.setPassword(this.passwordEncoder.encode(userInfo.getPassword()));
         return this.userInfoRepository.save(userInfo);
