@@ -42,6 +42,7 @@ public class KakaoAPI {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             StringBuilder sb = new StringBuilder();
             sb.append("grant_type=authorization_code");
+            //TODO client_id , rediect_uri 민감정보로 숨기기.
             sb.append("&client_id=f219ef1ed25c4900dc180c66a0ef06ba");
             sb.append("&redirect_uri=http://localhost:8080/api/userInfo/login");
             sb.append("&code=" + authorize_code);
@@ -123,15 +124,12 @@ public class KakaoAPI {
             String nickname = properties.getAsJsonObject().get("nickname").getAsString();
             String profile_photo = properties.getAsJsonObject().get("thumbnail_image").getAsString();
 
-            userInfoDto = UserInfoDto.builder()
-                    .id(id)
-                    .nickname(nickname)
-                    .profile_photo(profile_photo)
-                    .build();
+            userInfoDto.setId(id);
+            userInfoDto.setNickname(nickname);
+            userInfoDto.setProfile_photo(profile_photo);
 
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

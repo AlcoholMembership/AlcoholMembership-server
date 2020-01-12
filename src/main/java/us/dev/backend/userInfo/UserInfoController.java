@@ -14,7 +14,6 @@ import us.dev.backend.login.KakaoAPI;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,6 +36,7 @@ public class UserInfoController {
 
     /* get kakao authorized code */
     //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
+    //TODO API KEY 등 민감정보 숨겨야함.
     @GetMapping("/login")
     public ResponseEntity login(@RequestParam("code") String code) {
         UserInfoDto userInfoDto = kakaoAPI.getAccessToken(code);
@@ -73,11 +73,13 @@ public class UserInfoController {
         UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
 
         /* HATEOAS */
-        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class).slash(newUserInfo.getQrid());
+        //self link
+        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
         URI createdUri = selfLinkBuilder.toUri();
 
+        //other links
         UserInfoResource userInfoResource = new UserInfoResource(userInfo);
-        userInfoResource.add(linkTo(UserInfoController.class).withRel("getUserInfo"));
+        userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
         userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
 
         userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));

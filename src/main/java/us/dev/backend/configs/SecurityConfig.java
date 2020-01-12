@@ -32,16 +32,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Bean
-    public TokenStore tokenStore() {
-        return new InMemoryTokenStore();
-    }
+//    @Bean
+//    public TokenStore tokenStore() {
+//        return new InMemoryTokenStore();
+//    }
 
       //토큰 정보 영속화
-//    @Bean
-//    public TokenStore JdbcTokenStore(DataSource dataSource) {
-//        return new JdbcTokenStore(dataSource);
-//    }
+    @Bean
+    public JdbcTokenStore JdbcTokenStore(DataSource dataSource) {
+        return new JdbcTokenStore(dataSource);
+    }
 
 
     @Bean
@@ -66,8 +66,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     //http 통신 Security 설정. 여기서 다해줘야함.
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-    }
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//
+//    }
 }
