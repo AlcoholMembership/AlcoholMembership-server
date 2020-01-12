@@ -58,7 +58,7 @@ public class UserInfoController {
         userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
         userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
 
-        userInfoResource.add(new Link("/docs/index.html#resource-Loginkakako").withRel("profile"));
+        userInfoResource.add(new Link("/docs/index.html#resource-Loginkakao").withRel("profile"));
         return ResponseEntity.created(createdUri).body(userInfoResource);
 
     }
