@@ -25,15 +25,9 @@ public class UserInfoDto {
     @NotNull
     private String kakaoRefreshToken;
 
-    private String serviceAccessToken;
-    private String serviceRefreshToken;
-
     private String username;
     private String nickname;
     private String profile_photo;
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private Set<UserRole> roles;
 }

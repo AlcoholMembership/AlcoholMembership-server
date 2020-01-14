@@ -17,18 +17,20 @@ import java.util.Set;
 
 @Configuration
 public class AppConfig {
+
+    /* 데이터 Migration을 위한 modelmapper[이름이 같으면 옮겨짐] */
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
+    /* Password암호화 Encoder */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        //return new BCryptPasswordEncoder();
     }
 
-    //TEST를 위한 시작 유저 생성.
+    /* TEST를 위한 유저 생성 */
     @Bean
     public ApplicationRunner applicationRunner() {
         return new ApplicationRunner() {

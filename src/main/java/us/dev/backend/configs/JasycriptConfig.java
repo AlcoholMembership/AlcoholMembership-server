@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JasycriptConfig {
-
+    /*
+        민감정보 암호화를 위한 Bean등록
+     */
     @Autowired
     JasycriptInfo jasycriptInfo;
 

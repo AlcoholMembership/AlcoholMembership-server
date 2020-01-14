@@ -15,6 +15,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     /*
         API 서버 권한 설정.
+        접근 보호.
      */
 
     @Override

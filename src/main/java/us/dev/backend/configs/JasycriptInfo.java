@@ -8,9 +8,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "my-app")
+@ConfigurationProperties(prefix = "jasycript")
 @Getter @Setter
 public class JasycriptInfo {
+    /*
+        민감 정보를 받아오는 DTO
+        //TODO ClientSecret, ClientId, OauthTokenURL등 숨겨야함. (예정)
+    */
 
     //@Value("${DBPATH}")
     private String dbPath;

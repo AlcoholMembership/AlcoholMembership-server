@@ -2,6 +2,7 @@ package us.dev.backend.configs;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import us.dev.backend.common.AppProperties;
 import us.dev.backend.common.BaseControllerTest;
 import us.dev.backend.common.TestDescription;
 import us.dev.backend.userInfo.UserInfo;
@@ -27,13 +28,14 @@ public class AuthServerConfigTest extends BaseControllerTest {
     @Autowired
     UserInfoService userInfoService;
 
+    @Autowired
+    AppProperties appProperties;
+
     @Test
     @TestDescription("인증 토큰을 발급받는 테스트")
     public void getAuthToken() throws Exception {
-        String clientId = "clientId";
-        String clientSecret = "clientSecret";
         this.mockMvc.perform(post("/oauth/token")
-                    .with(httpBasic(clientId,clientSecret))
+                    .with(httpBasic(appProperties.getClientId(),appProperties.getClientSecret()))
                     .param("username","test_qrid")
                     .param("password","test_pwd")
                     .param("grant_type","password"))

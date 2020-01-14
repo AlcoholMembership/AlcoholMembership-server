@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import us.dev.backend.common.ErrorsResource;
 import us.dev.backend.coupon.CouponController;
 import us.dev.backend.login.KakaoAPI;
+import us.dev.backend.login.Oauth2Dto;
+import us.dev.backend.login.Oauth2Return;
 import us.dev.backend.qrCode.QRCodeController;
 import us.dev.backend.stamp.StampController;
 
@@ -37,6 +39,9 @@ public class UserInfoController {
     @Autowired
     KakaoAPI kakaoAPI;
 
+    @Autowired
+    Oauth2Return oauth2Return;
+
     /* get kakao authorized code */
     //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
     //TODO API KEY 등 민감정보 숨겨야함.
@@ -46,7 +51,6 @@ public class UserInfoController {
         /* TODO 아래 비어있는 데이터로 나중에 추가해주어야함 */
         userInfoDto.setQrid("TEMP_QRID");
         userInfoDto.setPassword("TEMP_PASSWORD");
-        userInfoDto.setRoles(Set.of(UserRole.USER));
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
@@ -69,21 +73,27 @@ public class UserInfoController {
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
+        /*
+            너가 id, qrid, kakaoAccessToken, kakaoRefreshToken, FcmToken,
+            nickname, profile imageurl 보냄
+            내가 id기준으로 저장.
+            저장하고 그걸 기준으로 oauth토큰 발급해서 붙여서 보내줌.
 
-        UserInfoDto userInfoDtokakao = kakaoAPI.getUserInfo(userInfoDto.getKakaoAccessToken());
-        userInfoDtokakao.setPassword("1234");
-        userInfoDtokakao.setUsername("홍길동");
-        userInfoDtokakao.setQrid(userInfoDto.getKakaoAccessToken());
-        userInfoDtokakao.setKakaoAccessToken(userInfoDto.getKakaoAccessToken());
-        userInfoDtokakao.setKakaoRefreshToken(userInfoDto.getKakaoRefreshToken());
-        userInfoDtokakao.setFcmToken(userInfoDto.getFcmToken());
-        userInfoDtokakao.setRoles(Set.of(UserRole.USER));
+         */
+
 
         //TODO /oauth/token post로 날려서 받아와야함 userifnoDtokakao에 accesstoken, refreshtoken 붙여서 return;
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
+        userInfo.setRoles(Set.of(UserRole.USER));
         UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
+        Oauth2Dto oauth2Dto = oauth2Return.getOauthData(newUserInfo);
 
+        if(oauth2Dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        /* HATEOUS */
         ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
         URI createdUri = selfLinkBuilder.toUri();
 

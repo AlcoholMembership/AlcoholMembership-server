@@ -31,16 +31,15 @@ public class UserInfoService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String qrid) throws UsernameNotFoundException {
-        //input 해당하는 Qrid 찾는다. 없으면 orElseThrow로 Exception을 보기좋게 출력함.
+        /* input 해당하는 Qrid 찾는다. 없으면 orElseThrow로 Exception을 보기좋게 출력함 */
         UserInfo userInfo = userInfoRepository.findByQrid(qrid)
                 .orElseThrow(()->new UsernameNotFoundException(qrid));
 
-        //userinfo 객체를 Spring Security가 이해할 수 있는 UserDatails로 타입을 바꿔줌.
-        //이 데이터를 인증할 때 넘겨준다.
+        /* UserInfo Object -> Spring Security가 이해할 수 있는 UserDatails로 TypeCast */
+        /* Token을 발급하기 위해, 아래 값으로 DB 내 고유식별값이 있는지 확인함. */
         return new User(userInfo.getQrid(),userInfo.getPassword(),authorities(userInfo.getRoles()));
     }
 
-    //userinfo 객체를 Spring Security가 이해할 수 있는 UserDatails로 타입을 바꿔줌.
     private Collection<? extends GrantedAuthority> authorities(Set<UserRole> roles) {
         return roles.stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))

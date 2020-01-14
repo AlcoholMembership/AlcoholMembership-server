@@ -24,6 +24,7 @@ public class KakaoAPI {
         2. FCM
      */
 
+    /* Authorize Code로 Kakao Oauth 인증 하기 */
     public UserInfoDto getAccessToken (String authorize_code) {
         String access_Token = "";
         String refresh_Token = "";
@@ -89,7 +90,7 @@ public class KakaoAPI {
     }
 
 
-
+    /* AccessToken을 넣어서 UserInfoDto 타입으로 유저정보 얻어오기 */
     public UserInfoDto getUserInfo (String access_Token, UserInfoDto userInfoDto) {
 
         //    요청하는 클라이언트마다 가진 정보가 다를 수 있기에 HashMap타입으로 선언
@@ -138,6 +139,7 @@ public class KakaoAPI {
         return userInfoDto;
     }
 
+    /* AccessToken 만 넣어서  UserInfoDto 타입으로 유저정보 얻어오기 */
     public UserInfoDto getUserInfo (String access_Token) {
         UserInfoDto returnUserInfoDto = null;
         HashMap<String, Object> kakakoAccountProperties = new HashMap<>();

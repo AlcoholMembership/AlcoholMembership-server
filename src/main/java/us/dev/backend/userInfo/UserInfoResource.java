@@ -6,10 +6,12 @@ import org.springframework.hateoas.Resource;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-/*
-* HETEOAS
-* */
+
 public class UserInfoResource extends Resource<UserInfo> {
+    /*
+        HATEOUS 부분.
+        전체 Json 안에 보기 좋게 출력해줌
+    */
 
     public UserInfoResource(UserInfo userInfo, Link... links) {
         super(userInfo, links);
@@ -18,17 +20,4 @@ public class UserInfoResource extends Resource<UserInfo> {
 
     }
 
-
-    /*
-    @JsonUnwrapped
-    private Event event;
-    
-    public EventResource(Event event) {
-        this.event = event;
-    }
-
-    public Event getEvent() {
-        return event;
-    }
-     */
 }
