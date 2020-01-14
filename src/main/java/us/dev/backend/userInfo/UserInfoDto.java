@@ -14,23 +14,23 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 public class UserInfoDto {
-    @NotNull
+
     private String qrid;
     @NotNull
     private String id;
-
+    @NotNull
     private String fcmToken;
     @NotNull
     private String kakaoAccessToken;
     @NotNull
     private String kakaoRefreshToken;
 
+    private String serviceAccessToken;
+    private String serviceRefreshToken;
+
     private String username;
-    @NotNull
     private String nickname;
-    @NotNull
     private String profile_photo;
-    @NotNull
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)

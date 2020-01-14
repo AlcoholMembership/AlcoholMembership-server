@@ -27,6 +27,9 @@ public class UserInfo {
 
     private String kakaoAccessToken;
     private String kakaoRefreshToken;
+    private String serviceAccessToken;
+    private String serviceRefreshToken;
+
     private String username;
     private String nickname;
     private String profile_photo;

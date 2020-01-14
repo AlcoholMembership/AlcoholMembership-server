@@ -10,7 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import us.dev.backend.common.ErrorsResource;
+import us.dev.backend.coupon.CouponController;
 import us.dev.backend.login.KakaoAPI;
+import us.dev.backend.qrCode.QRCodeController;
+import us.dev.backend.stamp.StampController;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -37,15 +40,13 @@ public class UserInfoController {
     /* get kakao authorized code */
     //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
     //TODO API KEY 등 민감정보 숨겨야함.
-    @GetMapping("/login")
-    public ResponseEntity login(@RequestParam("code") String code) {
+    @GetMapping("/login/web")
+    public ResponseEntity weblogin(@RequestParam("code") String code) {
         UserInfoDto userInfoDto = kakaoAPI.getAccessToken(code);
         /* TODO 아래 비어있는 데이터로 나중에 추가해주어야함 */
         userInfoDto.setQrid("TEMP_QRID");
         userInfoDto.setPassword("TEMP_PASSWORD");
         userInfoDto.setRoles(Set.of(UserRole.USER));
-
-
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
@@ -58,7 +59,41 @@ public class UserInfoController {
         userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
         userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
 
-        userInfoResource.add(new Link("/docs/index.html#resource-Loginkakao").withRel("profile"));
+        userInfoResource.add(new Link("/docs/index.html#resource-loginWeb").withRel("profile"));
+        return ResponseEntity.created(createdUri).body(userInfoResource);
+
+    }
+
+    @PostMapping("/login/app")
+    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
+        if(errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        UserInfoDto userInfoDtokakao = kakaoAPI.getUserInfo(userInfoDto.getKakaoAccessToken());
+        userInfoDtokakao.setPassword("1234");
+        userInfoDtokakao.setUsername("홍길동");
+        userInfoDtokakao.setQrid(userInfoDto.getKakaoAccessToken());
+        userInfoDtokakao.setKakaoAccessToken(userInfoDto.getKakaoAccessToken());
+        userInfoDtokakao.setKakaoRefreshToken(userInfoDto.getKakaoRefreshToken());
+        userInfoDtokakao.setFcmToken(userInfoDto.getFcmToken());
+        userInfoDtokakao.setRoles(Set.of(UserRole.USER));
+
+        //TODO /oauth/token post로 날려서 받아와야함 userifnoDtokakao에 accesstoken, refreshtoken 붙여서 return;
+
+        UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
+        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
+
+        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
+        URI createdUri = selfLinkBuilder.toUri();
+
+        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
+        userInfoResource.add(linkTo(CouponController.class).withRel("coupon"));
+        userInfoResource.add(linkTo(QRCodeController.class).withRel("qrCode"));
+        userInfoResource.add(linkTo(StampController.class).withRel("stamps"));
+        userInfoResource.add(linkTo(UserInfoController.class).withRel("userInfo"));
+
+        userInfoResource.add(new Link("/docs/index.html#resource-loginAndroid").withRel("profile"));
         return ResponseEntity.created(createdUri).body(userInfoResource);
 
     }

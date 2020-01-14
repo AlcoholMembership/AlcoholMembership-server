@@ -88,6 +88,8 @@ public class KakaoAPI {
         return getFinaluserInfoDto;
     }
 
+
+
     public UserInfoDto getUserInfo (String access_Token, UserInfoDto userInfoDto) {
 
         //    요청하는 클라이언트마다 가진 정보가 다를 수 있기에 HashMap타입으로 선언
@@ -134,6 +136,53 @@ public class KakaoAPI {
         }
 
         return userInfoDto;
+    }
+
+    public UserInfoDto getUserInfo (String access_Token) {
+        UserInfoDto returnUserInfoDto = null;
+        HashMap<String, Object> kakakoAccountProperties = new HashMap<>();
+        String reqURL = "https://kapi.kakao.com/v2/user/me";
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+
+            //    요청에 필요한 Header에 포함될 내용
+            conn.setRequestProperty("Authorization", "Bearer " + access_Token);
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("responseCode : " + responseCode);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String line = "";
+            String result = "";
+
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }
+
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(result);
+
+            /* 카카오 개인 계정 정보 받을 것 설정. */
+            JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
+            JsonObject kakao_account = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
+
+            String id = element.getAsJsonObject().get("id").getAsString();
+            String nickname = properties.getAsJsonObject().get("nickname").getAsString();
+            String profile_photo = properties.getAsJsonObject().get("thumbnail_image").getAsString();
+
+            returnUserInfoDto = UserInfoDto.builder()
+                    .id(id)
+                    .nickname(nickname)
+                    .profile_photo(profile_photo)
+                    .build();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return returnUserInfoDto;
     }
     /*
     -{
