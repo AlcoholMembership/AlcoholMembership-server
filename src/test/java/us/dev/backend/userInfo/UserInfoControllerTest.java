@@ -183,4 +183,22 @@ public class UserInfoControllerTest extends BaseControllerTest {
     }
 
 
+    @Test
+    @TestDescription("회원가입과 동시에 토큰을 받아오는 테스트")
+    public void loginAndgetOauthToken() throws Exception{
+        //Given
+        UserInfo userInfo = generateUserInfo();
+
+        //When & Then
+        mockMvc.perform(post("/api/userInfo/login/app")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(userInfo)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("serviceAccessToken").exists())
+                .andExpect(jsonPath("serviceRefreshToken").exists());
+    }
+
+
 }

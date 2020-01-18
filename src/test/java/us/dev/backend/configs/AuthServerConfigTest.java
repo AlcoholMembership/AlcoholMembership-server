@@ -52,4 +52,5 @@ public class AuthServerConfigTest extends BaseControllerTest {
                         )));
     }
 
+
 }

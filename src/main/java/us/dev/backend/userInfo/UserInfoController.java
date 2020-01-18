@@ -1,26 +1,38 @@
 package us.dev.backend.userInfo;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import us.dev.backend.common.AppProperties;
 import us.dev.backend.common.ErrorsResource;
+import us.dev.backend.configs.AppConfig;
+import us.dev.backend.configs.RestTemplateLoggingRequestInterceptor;
 import us.dev.backend.coupon.CouponController;
 import us.dev.backend.login.KakaoAPI;
 import us.dev.backend.login.Oauth2Dto;
-import us.dev.backend.login.Oauth2Return;
 import us.dev.backend.qrCode.QRCodeController;
 import us.dev.backend.stamp.StampController;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
-import java.util.Set;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.Base64.Encoder;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -40,10 +52,13 @@ public class UserInfoController {
     KakaoAPI kakaoAPI;
 
     @Autowired
-    Oauth2Return oauth2Return;
+    UserInfoService userInfoService;
 
     @Autowired
-    UserInfoService userInfoService;
+    AppConfig appConfig;
+
+    @Autowired
+    AppProperties appProperties;
 
     /* get kakao authorized code */
     //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
@@ -72,25 +87,20 @@ public class UserInfoController {
     }
 
     @PostMapping("/login/app")
-    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
+    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) throws URISyntaxException {
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
-        /*
-            너가 id, qrid, kakaoAccessToken, kakaoRefreshToken, FcmToken,
-            nickname, profile imageurl 보냄
-            내가 id기준으로 저장.
-            저장하고 그걸 기준으로 oauth토큰 발급해서 붙여서 보내줌.
-
-         */
-
-
         //TODO /oauth/token post로 날려서 받아와야함 userifnoDtokakao에 accesstoken, refreshtoken 붙여서 return;
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         userInfo.setRoles(Set.of(UserRole.USER));
         UserInfo newUserInfo = this.userInfoService.saveUserInfo(userInfo);
 
+
+        String temp = getOauth2Token(userInfo.getQrid(), userInfo.getPassword());
+        System.out.println("#####################################################");
+        System.out.println(temp);
 
         /* HATEOUS */
         ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
@@ -176,5 +186,38 @@ public class UserInfoController {
 
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
+    }
+
+    public String getOauth2Token(String username, String password) {
+        final String CLIENT_ID = appProperties.getClientId();
+        final String CLIENT_SECRET = appProperties.getClientSecret();
+        final String SERVER_URL = appProperties.getGetOauthURL();
+
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(CLIENT_ID,CLIENT_SECRET);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        //headers.add("Authorization","Basic " + "bWVtYmVyc2hpcDpza3VuaXY=");
+
+        MultiValueMap<String,String> parameters = new LinkedMultiValueMap<>();
+        parameters.add("username",username);
+        parameters.add("password",password);
+        parameters.add("grant_type","password");
+
+        final HttpEntity<MultiValueMap<String,String>> requestEntity = new HttpEntity<>(parameters,headers);
+        ResponseEntity<Map> response = null;
+        URI uri = URI.create("http://localhost:8080/oauth/token");
+
+        try {
+            RestTemplate restTemplate = appConfig.customizeRestTemplate();
+            restTemplate.setInterceptors(Arrays.asList(new RestTemplateLoggingRequestInterceptor()));
+            response = restTemplate.postForEntity(uri,requestEntity,Map.class);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (String) response.getBody().get("access_token");
+
     }
 }
