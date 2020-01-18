@@ -42,6 +42,9 @@ public class UserInfoController {
     @Autowired
     Oauth2Return oauth2Return;
 
+    @Autowired
+    UserInfoService userInfoService;
+
     /* get kakao authorized code */
     //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
     //TODO API KEY 등 민감정보 숨겨야함.
@@ -86,12 +89,8 @@ public class UserInfoController {
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         userInfo.setRoles(Set.of(UserRole.USER));
-        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
-        Oauth2Dto oauth2Dto = oauth2Return.getOauthData(newUserInfo);
+        UserInfo newUserInfo = this.userInfoService.saveUserInfo(userInfo);
 
-        if(oauth2Dto == null) {
-            return ResponseEntity.notFound().build();
-        }
 
         /* HATEOUS */
         ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);

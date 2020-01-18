@@ -30,7 +30,7 @@ create table if not exists oauth_access_token (
   refresh_token VARCHAR(256)
 );
 
-create table oauth_refresh_token (
+create table if not exists oauth_refresh_token (
   token_id VARCHAR(256),
   token bytea,
   authentication bytea
