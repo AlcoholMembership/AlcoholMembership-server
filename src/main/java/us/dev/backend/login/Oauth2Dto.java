@@ -11,18 +11,13 @@ import javax.validation.constraints.NotNull;
 @Setter
 public class Oauth2Dto {
 
-    @NotNull
     private String access_token;
 
-    @NotNull
     private String token_type;
 
-    @NotNull
     private String refresh_token;
 
-    @NotNull
     private String scope;
 
-    @NotNull
     private String expires_in;
 }

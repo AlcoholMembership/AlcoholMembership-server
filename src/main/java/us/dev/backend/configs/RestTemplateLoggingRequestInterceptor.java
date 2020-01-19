@@ -24,7 +24,8 @@ public class RestTemplateLoggingRequestInterceptor implements ClientHttpRequestI
         // execute
         ClientHttpResponse response = clientHttpRequestExecution.execute(httpRequest, body);
         // response log
-        traceResponse(response, uri); return response;
+        traceResponse(response, uri);
+        return response;
 
     }
 
@@ -40,7 +41,7 @@ public class RestTemplateLoggingRequestInterceptor implements ClientHttpRequestI
                 log.info(reqLog.toString());
     }
 
-    private void traceResponse(ClientHttpResponse response, URI uri) throws IOException {
+    private String traceResponse(ClientHttpResponse response, URI uri) throws IOException {
         StringBuilder resLog = new StringBuilder();
         resLog.append("[RESPONSE] ")
                 .append("Uri : ")
@@ -49,7 +50,14 @@ public class RestTemplateLoggingRequestInterceptor implements ClientHttpRequestI
                 .append(response.getStatusCode())
                 .append(", Response Body : ")
                 .append(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
-                log.info(resLog.toString()); }
+                log.info(resLog.toString());
+
+
+                return resLog.toString();
+    }
+
+
+
 
 
 }

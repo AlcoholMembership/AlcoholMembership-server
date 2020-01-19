@@ -4,20 +4,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import us.dev.backend.common.AppProperties;
 import us.dev.backend.common.ErrorsResource;
 import us.dev.backend.configs.AppConfig;
@@ -32,7 +28,6 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.Base64.Encoder;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -40,13 +35,14 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @Controller
 @RequestMapping(value = "/api/userInfo", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
 public class UserInfoController {
-    private final UserInfoRepository userInfoRepository;
     private final ModelMapper modelMapper;
 
-    public UserInfoController(UserInfoRepository userInfoRepository, ModelMapper modelMapper) {
-        this.userInfoRepository = userInfoRepository;
+    public UserInfoController(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
+
+    @Autowired
+    UserInfoRepository userInfoRepository;
 
     @Autowired
     KakaoAPI kakaoAPI;
@@ -60,9 +56,7 @@ public class UserInfoController {
     @Autowired
     AppProperties appProperties;
 
-    /* get kakao authorized code */
-    //TODO TDD 작성하기 -> make document, HATEOUS 제대로 동작하게 맵핑할 것. 지금 맵핑URL이 잘못되었음.
-    //TODO API KEY 등 민감정보 숨겨야함.
+    /* Kakao Login을 웹 환경에서 로그인하기 "code"를 받아와야 */
     @GetMapping("/login/web")
     public ResponseEntity weblogin(@RequestParam("code") String code) {
         UserInfoDto userInfoDto = kakaoAPI.getAccessToken(code);
@@ -86,21 +80,29 @@ public class UserInfoController {
 
     }
 
+    /* 안드로이드 로그인으로 회원정보 생성하여 리턴해주기 */
     @PostMapping("/login/app")
     public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) throws URISyntaxException {
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
-        //TODO /oauth/token post로 날려서 받아와야함 userifnoDtokakao에 accesstoken, refreshtoken 붙여서 return;
 
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         userInfo.setRoles(Set.of(UserRole.USER));
         UserInfo newUserInfo = this.userInfoService.saveUserInfo(userInfo);
 
 
-        String temp = getOauth2Token(userInfo.getQrid(), userInfo.getPassword());
-        System.out.println("#####################################################");
-        System.out.println(temp);
+        String getOuath2Dto = getOauth2Token(userInfo.getQrid(), userInfo.getPassword());
+        JsonParser jsonParser = new JsonParser();
+        JsonElement jsonElement = jsonParser.parse(getOuath2Dto);
+        String getaccess_Token = jsonElement.getAsJsonObject().get("access_token").getAsString();
+        String getrefrsh_Token = jsonElement.getAsJsonObject().get("refresh_token").getAsString();
+        if(getaccess_Token == null || getrefrsh_Token == null ) {
+            userInfoRepository.delete(userInfo);
+            return ResponseEntity.notFound().build();
+        }
+        userInfo.setServiceAccessToken(getaccess_Token);
+        userInfo.setServiceRefreshToken(getrefrsh_Token);
 
         /* HATEOUS */
         ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
@@ -117,29 +119,32 @@ public class UserInfoController {
 
     }
 
-    @PostMapping
-    public ResponseEntity createUserInfo(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
-        if(errors.hasErrors()) {
-            return badRequest(errors);
-        }
+    /* 회원정보 생성 하기  */
+//    @PostMapping
+//    public ResponseEntity createUserInfo(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
+//        if(errors.hasErrors()) {
+//            return badRequest(errors);
+//        }
+//
+//        UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
+//        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
+//
+//        /* HATEOAS */
+//        //self link
+//        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
+//        URI createdUri = selfLinkBuilder.toUri();
+//
+//        //other links
+//        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
+//        userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
+//        userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
+//
+//        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
+//        return ResponseEntity.created(createdUri).body(userInfoResource);
+//    }
 
-        UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
-        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
 
-        /* HATEOAS */
-        //self link
-        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
-        URI createdUri = selfLinkBuilder.toUri();
-
-        //other links
-        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
-        userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
-        userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
-
-        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
-        return ResponseEntity.created(createdUri).body(userInfoResource);
-    }
-
+    /* 회원정보 가져오기 */
     @GetMapping("/{qrid}")
     public ResponseEntity getUserInfo(@PathVariable String qrid) {
         Optional<UserInfo> optionalUserInfo = this.userInfoRepository.findById(qrid);
@@ -153,6 +158,7 @@ public class UserInfoController {
         return ResponseEntity.ok(userInfoResource);
     }
 
+    /* 회원정보 수정 */
     @PutMapping("/{qrid}")
     public ResponseEntity updateUserInfo(@PathVariable String qrid,
                                          @RequestBody @Valid UserInfoDto userInfoDto,
@@ -184,40 +190,46 @@ public class UserInfoController {
 //
 //    }
 
+    /* BadRequest Customize */
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
     }
 
-    public String getOauth2Token(String username, String password) {
+    /* Oauth2 Server로 인증하여 Token 정보받아오기  */
+    public String getOauth2Token(String qrid, String encoingpass) {
         final String CLIENT_ID = appProperties.getClientId();
         final String CLIENT_SECRET = appProperties.getClientSecret();
         final String SERVER_URL = appProperties.getGetOauthURL();
 
+        final String inputQrid = qrid;
+        final String inputPassword = appConfig.passwordEncoder().encode(encoingpass);
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth(CLIENT_ID,CLIENT_SECRET);
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        //headers.add("Authorization","Basic " + "bWVtYmVyc2hpcDpza3VuaXY=");
 
+        //TODO password를 변수로 바꾸면 장애가 됨. ^^ㅣ발
         MultiValueMap<String,String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("username",username);
-        parameters.add("password",password);
         parameters.add("grant_type","password");
+        parameters.add("username",inputQrid);
+        parameters.add("password","1234");
 
         final HttpEntity<MultiValueMap<String,String>> requestEntity = new HttpEntity<>(parameters,headers);
-        ResponseEntity<Map> response = null;
-        URI uri = URI.create("http://localhost:8080/oauth/token");
+        String response = null;
+        URI uri = URI.create(SERVER_URL);
 
         try {
             RestTemplate restTemplate = appConfig.customizeRestTemplate();
+            response = restTemplate.postForObject(uri,requestEntity,String.class);
             restTemplate.setInterceptors(Arrays.asList(new RestTemplateLoggingRequestInterceptor()));
-            response = restTemplate.postForEntity(uri,requestEntity,Map.class);
         }
         catch (Exception e) {
-            e.printStackTrace();
         }
-        return (String) response.getBody().get("access_token");
+        if(response == null) {
+            return null;
+        }
+        return response;
 
     }
 }

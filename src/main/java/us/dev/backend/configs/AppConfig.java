@@ -38,6 +38,7 @@ public class AppConfig {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setReadTimeout(10000);
         requestFactory.setConnectTimeout(10000);
+        requestFactory.setOutputStreaming(false);
 
         RestTemplate restTemplate = new RestTemplate(requestFactory);
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
