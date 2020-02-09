@@ -3,10 +3,10 @@ package us.dev.backend.index;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import us.dev.backend.Coupon.CouponController;
-import us.dev.backend.QRCode.QRCodeController;
-import us.dev.backend.Stamp.StampController;
-import us.dev.backend.UserInfo.UserInfoController;
+import us.dev.backend.coupon.CouponController;
+import us.dev.backend.qrCode.QRCodeController;
+import us.dev.backend.stamp.StampController;
+import us.dev.backend.userInfo.UserInfoController;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
