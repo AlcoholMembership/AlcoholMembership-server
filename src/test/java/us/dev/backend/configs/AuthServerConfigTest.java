@@ -36,8 +36,8 @@ public class AuthServerConfigTest extends BaseControllerTest {
     public void getAuthToken() throws Exception {
         this.mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(appProperties.getClientId(),appProperties.getClientSecret()))
-                    .param("username","test_qrid")
-                    .param("password","test_pwd")
+                    .param("username","InitTEST_QRID")
+                    .param("password","1234")
                     .param("grant_type","password"))
                 .andDo(print())
                 .andExpect(status().isOk())

@@ -229,6 +229,7 @@ public class UserInfoController {
         if(response == null) {
             return null;
         }
+        System.out.println(response);
         return response;
 
     }

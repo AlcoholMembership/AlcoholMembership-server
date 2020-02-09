@@ -71,7 +71,7 @@ public class UserInfoServiceTest {
         //예상되는 예외를 "미리"적어주어야한다.
         //expected
         expectedException.expect(UsernameNotFoundException.class);
-        String username = "random@naver.com";
+        String username = "username";
         expectedException.expectMessage(Matchers.containsString(username));
 
         //when

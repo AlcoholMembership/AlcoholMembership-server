@@ -65,15 +65,15 @@ public class AppConfig {
             @Override
             public void run(ApplicationArguments args) throws Exception {
                 UserInfo userInfo = UserInfo.builder()
-                        .qrid("Qrid_TEST")
-                        .id("KakaoID_TEST")
+                        .qrid("InitTEST_QRID")
+                        .id("InitTEST_KakaoID")
                         .password("1234")
-                        .username("특별시")
-                        .fcmToken("FCMToken_TEST")
-                        .kakaoAccessToken("KakaoAccessToken_TEST")
-                        .kakaoRefreshToken("KakaoRefreshToken_TEST")
-                        .nickname("앙기모띠")
-                        .profile_photo("ProfileURL_TEST")
+                        .username("InitTEST_Username")
+                        .fcmToken("InitTEST_FcmToken")
+                        .kakaoAccessToken("InitTEST_AccessToken")
+                        .kakaoRefreshToken("InitTEST_RefreshToken")
+                        .nickname("InitTEST_Nickname")
+                        .profile_photo("InitTEST_ProfileImage")
                         .roles(Set.of(UserRole.ADMIN, UserRole.USER))
                         .build();
                 userInfoService.saveUserInfo(userInfo);

@@ -70,10 +70,12 @@ public class UserInfoControllerTest extends BaseControllerTest {
                                 fieldWithPath("fcmToken").description("Fcm Token id"),
                                 fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
                                 fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
                                 fieldWithPath("password").description("회원 password"),
-                                fieldWithPath("profile_photo").description("회원 프로필 사"),
-                                fieldWithPath("nickname").description("Kakao 닉네"),
-                                fieldWithPath("username").description("회원 이"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+                                fieldWithPath("nickname").description("Kakao 닉네임"),
+                                fieldWithPath("username").description("회원 이름"),
                                 fieldWithPath("roles").description("회원 권한")
 
                         ),
@@ -83,6 +85,8 @@ public class UserInfoControllerTest extends BaseControllerTest {
                                 fieldWithPath("fcmToken").description("Fcm Token id"),
                                 fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
                                 fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
                                 fieldWithPath("password").description("회원 password"),
                                 fieldWithPath("profile_photo").description("회원 프로필 사진진"),
                                 fieldWithPath("nickname").description("Kakao 닉네"),
@@ -113,7 +117,16 @@ public class UserInfoControllerTest extends BaseControllerTest {
                         relaxedResponseFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
                                 fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("pushToken").description("Push알림을 위한 Token id")
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진진"),
+                                fieldWithPath("nickname").description("Kakao 닉네"),
+                                fieldWithPath("username").description("회원 이"),
+                                fieldWithPath("roles").description("회원 권한")
                         )));
     }
 
@@ -156,19 +169,31 @@ public class UserInfoControllerTest extends BaseControllerTest {
                         requestFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
                                 fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("pushToken").description("Push알림을 위한 Token id")
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+                                fieldWithPath("nickname").description("Kakao 닉네임"),
+                                fieldWithPath("username").description("회원 이름")
                         ),
                         relaxedResponseFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
                                 fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("pushToken").description("Push알림을 위한 Token id")
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+                                fieldWithPath("nickname").description("Kakao 닉네임"),
+                                fieldWithPath("username").description("회원 이름")
                         )));
     }
 
 
     private UserInfo generateUserInfo() {
         UserInfo userInfo = UserInfo.builder()
-                .qrid("qrid")
+                .qrid("InitTEST_Username")
                 .id("login_test_token_id")
                 .fcmToken("test_fcmToken")
                 .kakaoAccessToken("test_kakaoAccessToken")
@@ -183,17 +208,29 @@ public class UserInfoControllerTest extends BaseControllerTest {
     }
 
 
+
     @Test
     @TestDescription("회원가입과 동시에 토큰을 받아오는 테스트")
     public void loginAndgetOauthToken() throws Exception{
         //Given
-        UserInfo userInfo = generateUserInfo();
+        UserInfoDto userInfodto = UserInfoDto.builder()
+                .qrid("InitTEST_Username")
+                .id("login_test_token_id")
+                .fcmToken("test_fcmToken")
+                .kakaoAccessToken("test_kakaoAccessToken")
+                .kakaoRefreshToken("test_kakaoRefreshToken")
+                .password("1234")
+                .profile_photo("test_profile_photo")
+                .nickname("test_nickname")
+                .username("test_username")
+                .build();
+
 
         //When & Then
         mockMvc.perform(post("/api/userInfo/login/app")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(userInfo)))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                //.accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(userInfodto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("serviceAccessToken").exists())
