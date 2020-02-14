@@ -21,12 +21,17 @@ import us.dev.backend.configs.RestTemplateLoggingRequestInterceptor;
 import us.dev.backend.coupon.CouponController;
 import us.dev.backend.login.KakaoAPI;
 import us.dev.backend.login.Oauth2Dto;
+import us.dev.backend.qrCode.QRCode;
 import us.dev.backend.qrCode.QRCodeController;
+import us.dev.backend.qrCode.QRCodeRepository;
+import us.dev.backend.stamp.Stamp;
 import us.dev.backend.stamp.StampController;
+import us.dev.backend.stamp.StampRepository;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -43,6 +48,8 @@ public class UserInfoController {
 
     @Autowired
     UserInfoRepository userInfoRepository;
+    StampRepository stampRepository;
+    QRCodeRepository qrCodeRepository;
 
     @Autowired
     KakaoAPI kakaoAPI;
@@ -82,33 +89,52 @@ public class UserInfoController {
 
     /* 안드로이드 로그인으로 회원정보 생성하여 리턴해주기 */
     @PostMapping("/login/app")
-    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) throws URISyntaxException {
+    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
 
+        /* Dto -> 'UserInfo'로 변환 */
         UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
         userInfo.setRoles(Set.of(UserRole.USER));
+
+        /* 저장을 한번해야 Oauth2 인증 가능 */
         UserInfo newUserInfo = this.userInfoService.saveUserInfo(userInfo);
 
-
+        /* 자체 Oauth2 인증 */
         String getOuath2Dto = getOauth2Token(userInfo.getQrid(), userInfo.getPassword());
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(getOuath2Dto);
         String getaccess_Token = jsonElement.getAsJsonObject().get("access_token").getAsString();
         String getrefrsh_Token = jsonElement.getAsJsonObject().get("refresh_token").getAsString();
+
+        /* Token 제대로 읽었는지 확인 */
         if(getaccess_Token == null || getrefrsh_Token == null ) {
             userInfoRepository.delete(userInfo);
             return ResponseEntity.notFound().build();
         }
-        userInfo.setServiceAccessToken(getaccess_Token);
-        userInfo.setServiceRefreshToken(getrefrsh_Token);
+        newUserInfo.setServiceAccessToken(getaccess_Token);
+        newUserInfo.setServiceRefreshToken(getrefrsh_Token);
+
+
+        /* 마지막으로 최종 저장  */
+        this.userInfoRepository.save(newUserInfo);
+
+        /* User 생성 시, 최초 Qrcode init(stamp:0, coupon:0) */
+        QRCode qrCode = QRCode.builder()
+                .qrid(newUserInfo.getQrid())
+                .stamp_cnt(0)
+                .coupon_cnt(0)
+                .build();
+
+        this.qrCodeRepository.save(qrCode);
+
 
         /* HATEOUS */
         ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
         URI createdUri = selfLinkBuilder.toUri();
 
-        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
+        UserInfoResource userInfoResource = new UserInfoResource(newUserInfo);
         userInfoResource.add(linkTo(CouponController.class).withRel("coupon"));
         userInfoResource.add(linkTo(QRCodeController.class).withRel("qrCode"));
         userInfoResource.add(linkTo(StampController.class).withRel("stamps"));

@@ -1,9 +1,11 @@
 package us.dev.backend.stamp;
 
 import lombok.*;
+import us.dev.backend.userInfo.UserInfo;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
@@ -22,4 +24,6 @@ public class Stamp {
     private String qrid;
     private LocalDateTime saveTime;
     private String location;
+
+
 }

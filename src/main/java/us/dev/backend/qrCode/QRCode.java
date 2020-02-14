@@ -1,9 +1,12 @@
 package us.dev.backend.qrCode;
 
 import lombok.*;
+import us.dev.backend.userInfo.UserInfo;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
 @Builder
 @AllArgsConstructor
@@ -22,4 +25,5 @@ public class QRCode {
     private String qrid;
     private Integer coupon_cnt;
     private Integer stamp_cnt;
+
 }
