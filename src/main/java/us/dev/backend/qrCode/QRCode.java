@@ -1,12 +1,10 @@
 package us.dev.backend.qrCode;
 
 import lombok.*;
-import us.dev.backend.userInfo.UserInfo;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.validation.constraints.Min;
 
 @Builder
 @AllArgsConstructor

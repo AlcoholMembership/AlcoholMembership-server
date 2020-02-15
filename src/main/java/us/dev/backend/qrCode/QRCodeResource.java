@@ -14,7 +14,7 @@ public class QRCodeResource extends Resource<QRCode> {
     public QRCodeResource(QRCode qrCode, Link... links) {
         super(qrCode, links);
         //add(new Link("http://localhost:8080/api/events/"+event.getId())); 같은 거임.
-        add(linkTo(QRCodeController.class).slash(qrCode.getQrid()).withSelfRel());
+        add(linkTo(QRCodeController.class).withSelfRel());
 
     }
 

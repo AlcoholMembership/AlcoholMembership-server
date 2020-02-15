@@ -23,79 +23,63 @@ public class UserInfoControllerTest extends BaseControllerTest {
     @Autowired
     UserInfoRepository userInfoRepository;
 
-    @Test
-    @TestDescription("UserInfo 생성 테스트")
-    public void createUserInfo() throws Exception {
-        /*
-            @NotNull
-    private String qrid;
-    @NotNull
-    private String id;
+    @Autowired
+    UserInfoService userInfoService;
 
-    private String fcmToken;
-    @NotNull
-    private String kakaoAccessToken;
-    @NotNull
-    private String kakaoRefreshToken;
-
-    private String username;
-    @NotNull
-    private String nickname;
-    @NotNull
-    private String profile_photo;
-    @NotNull
-    private String password;
-         */
-        //given
-        UserInfo userInfo = generateUserInfo();
-        //when & then
-        mockMvc.perform(post("/api/userInfo/")
-                    .contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(userInfo)))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("qrid").exists())
-                .andExpect(jsonPath("id").exists())
-                .andDo(document("createUserInfo",
-                        links(
-                                linkWithRel("self").description("현재 링크"),
-                                linkWithRel("getUserInfo").description("유저 정보를 가져오는 링크"),
-                                linkWithRel("updateUserInfo").description("유저 정보를 변경하는 링크"),
-                                linkWithRel("profile").description("도큐먼트 링크")
-                        ),
-                        requestFields(
-                                fieldWithPath("qrid").description("회원 고유 QRCode"),
-                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("fcmToken").description("Fcm Token id"),
-                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
-                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
-                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
-                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
-                                fieldWithPath("password").description("회원 password"),
-                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
-                                fieldWithPath("nickname").description("Kakao 닉네임"),
-                                fieldWithPath("username").description("회원 이름"),
-                                fieldWithPath("roles").description("회원 권한")
-
-                        ),
-                        relaxedResponseFields(
-                                fieldWithPath("qrid").description("회원 고유 QRCode"),
-                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("fcmToken").description("Fcm Token id"),
-                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
-                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
-                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
-                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
-                                fieldWithPath("password").description("회원 password"),
-                                fieldWithPath("profile_photo").description("회원 프로필 사진진"),
-                                fieldWithPath("nickname").description("Kakao 닉네"),
-                                fieldWithPath("username").description("회원 이"),
-                                fieldWithPath("roles").description("회원 권한")
-                        )
-                ))
-        ;
-    }
+//    @Test
+//    @TestDescription("UserInfo 생성 테스트")
+//    public void createUserInfo() throws Exception {
+//
+//        //given
+//        UserInfo userInfo = generateUserInfo();
+//        //when & then
+//        mockMvc.perform(post("/api/userInfo/")
+//                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+//                    .accept(MediaTypes.HAL_JSON)
+//                    .content(objectMapper.writeValueAsString(userInfo)))
+//                .andDo(print())
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("qrid").exists())
+//                .andExpect(jsonPath("id").exists())
+//                .andDo(document("createUserInfo",
+//                        links(
+//                                linkWithRel("self").description("현재 링크"),
+//                                linkWithRel("getUserInfo").description("유저 정보를 가져오는 링크"),
+//                                linkWithRel("updateUserInfo").description("유저 정보를 변경하는 링크"),
+//                                linkWithRel("profile").description("도큐먼트 링크")
+//                        ),
+//                        requestFields(
+//                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+//                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+//                                fieldWithPath("fcmToken").description("Fcm Token id"),
+//                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+//                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+//                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+//                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
+//                                fieldWithPath("password").description("회원 password"),
+//                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+//                                fieldWithPath("nickname").description("Kakao 닉네임"),
+//                                fieldWithPath("username").description("회원 이름"),
+//                                fieldWithPath("roles").description("회원 권한")
+//
+//                        ),
+//                        relaxedResponseFields(
+//                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+//                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+//                                fieldWithPath("fcmToken").description("Fcm Token id"),
+//                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+//                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+//                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+//                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
+//                                fieldWithPath("password").description("회원 password"),
+//                                fieldWithPath("profile_photo").description("회원 프로필 사진진"),
+//                                fieldWithPath("nickname").description("Kakao 닉네"),
+//                                fieldWithPath("username").description("회원 이"),
+//                                fieldWithPath("roles").description("회원 권한")
+//                        )
+//                ))
+//        ;
+//    }
 
     @Test
     @TestDescription("UserInfo Get 테스트")
@@ -208,7 +192,8 @@ public class UserInfoControllerTest extends BaseControllerTest {
     }
 
 
-
+    //TODO AuthServerConfig Test부분 보고 해도됨.
+    //TODO 이거 TDD 짜고, index.dcos 수정하고, Qrcode 수정가능한 코드 짤 것.
     @Test
     @TestDescription("회원가입과 동시에 토큰을 받아오는 테스트")
     public void loginAndgetOauthToken() throws Exception{
@@ -228,13 +213,51 @@ public class UserInfoControllerTest extends BaseControllerTest {
 
         //When & Then
         mockMvc.perform(post("/api/userInfo/login/app")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                //.accept(MediaTypes.HAL_JSON)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(userInfodto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("serviceAccessToken").exists())
-                .andExpect(jsonPath("serviceRefreshToken").exists());
+                .andExpect(jsonPath("serviceRefreshToken").exists())
+                .andDo(document("createUserInfo",
+                        links(
+                                linkWithRel("self").description("현재 링크"),
+                                linkWithRel("getUserInfo").description("유저 정보를 가져오는 링크"),
+                                linkWithRel("updateUserInfo").description("유저 정보를 변경하는 링크"),
+                                linkWithRel("profile").description("도큐먼트 링크")
+                        ),
+                        requestFields(
+                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+                                fieldWithPath("nickname").description("Kakao 닉네임"),
+                                fieldWithPath("username").description("회원 이름"),
+                                fieldWithPath("roles").description("회원 권한")
+
+                        ),
+                        relaxedResponseFields(
+                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
+                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진진"),
+                                fieldWithPath("nickname").description("Kakao 닉네"),
+                                fieldWithPath("username").description("회원 이"),
+                                fieldWithPath("roles").description("회원 권한")
+                        )
+                ))
+
+        ;
     }
 
 

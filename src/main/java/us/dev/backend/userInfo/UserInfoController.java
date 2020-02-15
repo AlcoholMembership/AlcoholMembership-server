@@ -20,18 +20,14 @@ import us.dev.backend.configs.AppConfig;
 import us.dev.backend.configs.RestTemplateLoggingRequestInterceptor;
 import us.dev.backend.coupon.CouponController;
 import us.dev.backend.login.KakaoAPI;
-import us.dev.backend.login.Oauth2Dto;
 import us.dev.backend.qrCode.QRCode;
 import us.dev.backend.qrCode.QRCodeController;
+import us.dev.backend.qrCode.QRCodeDto;
 import us.dev.backend.qrCode.QRCodeRepository;
-import us.dev.backend.stamp.Stamp;
 import us.dev.backend.stamp.StampController;
-import us.dev.backend.stamp.StampRepository;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -48,7 +44,6 @@ public class UserInfoController {
 
     @Autowired
     UserInfoRepository userInfoRepository;
-    StampRepository stampRepository;
     QRCodeRepository qrCodeRepository;
 
     @Autowired
@@ -120,14 +115,30 @@ public class UserInfoController {
         /* 마지막으로 최종 저장  */
         this.userInfoRepository.save(newUserInfo);
 
-        /* User 생성 시, 최초 Qrcode init(stamp:0, coupon:0) */
-        QRCode qrCode = QRCode.builder()
+        //TODO 여기 에러 발생함. NullPoint 뜸, OneToOne 관계도 안됨.
+        //RESTtemplate를 이용할지, 일단 따로 만들어서(save과정만따로) 테스트해봐야할듯
+
+        /* 최초 회원정보 생성 시, QRCode 정보 init [Stamp, Coupon = 0] */
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String initQRCodeURI = "http://127.0.0.1:8080/api/qrCode";
+        QRCodeDto inputQRCodeDto = QRCodeDto.builder()
                 .qrid(newUserInfo.getQrid())
                 .stamp_cnt(0)
                 .coupon_cnt(0)
                 .build();
 
-        this.qrCodeRepository.save(qrCode);
+
+        HttpEntity<QRCodeDto> entity = new HttpEntity<>(inputQRCodeDto, headers);
+
+        QRCode returnQRCode = restTemplate.postForObject(initQRCodeURI, entity, QRCode.class);
+
+        if(returnQRCode == null) {
+            System.out.println(errors);
+        }
+
 
 
         /* HATEOUS */
@@ -144,31 +155,6 @@ public class UserInfoController {
         return ResponseEntity.created(createdUri).body(userInfoResource);
 
     }
-
-    /* 회원정보 생성 하기  */
-//    @PostMapping
-//    public ResponseEntity createUserInfo(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
-//        if(errors.hasErrors()) {
-//            return badRequest(errors);
-//        }
-//
-//        UserInfo userInfo = this.modelMapper.map(userInfoDto,UserInfo.class);
-//        UserInfo newUserInfo = this.userInfoRepository.save(userInfo);
-//
-//        /* HATEOAS */
-//        //self link
-//        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
-//        URI createdUri = selfLinkBuilder.toUri();
-//
-//        //other links
-//        UserInfoResource userInfoResource = new UserInfoResource(userInfo);
-//        userInfoResource.add(linkTo(UserInfoController.class).slash(newUserInfo.getQrid()).withRel("getUserInfo"));
-//        userInfoResource.add(selfLinkBuilder.withRel("updateUserInfo"));
-//
-//        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
-//        return ResponseEntity.created(createdUri).body(userInfoResource);
-//    }
-
 
     /* 회원정보 가져오기 */
     @GetMapping("/{qrid}")
@@ -259,4 +245,6 @@ public class UserInfoController {
         return response;
 
     }
+
+
 }
