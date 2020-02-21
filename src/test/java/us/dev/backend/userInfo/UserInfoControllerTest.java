@@ -4,6 +4,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
+import us.dev.backend.common.AppProperties;
 import us.dev.backend.common.BaseControllerTest;
 import us.dev.backend.common.TestDescription;
 
@@ -12,6 +15,7 @@ import java.util.Set;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,6 +29,9 @@ public class UserInfoControllerTest extends BaseControllerTest {
 
     @Autowired
     UserInfoService userInfoService;
+
+    @Autowired
+    AppProperties appProperties;
 
 //    @Test
 //    @TestDescription("UserInfo 생성 테스트")
@@ -199,16 +206,22 @@ public class UserInfoControllerTest extends BaseControllerTest {
     public void loginAndgetOauthToken() throws Exception{
         //Given
         UserInfoDto userInfodto = UserInfoDto.builder()
-                .qrid("InitTEST_Username")
-                .id("login_test_token_id")
-                .fcmToken("test_fcmToken")
-                .kakaoAccessToken("test_kakaoAccessToken")
-                .kakaoRefreshToken("test_kakaoRefreshToken")
+                .qrid("InitTEST_QRID")
+                .id("InitTEST_KakaoID")
                 .password("1234")
-                .profile_photo("test_profile_photo")
-                .nickname("test_nickname")
-                .username("test_username")
+                .username("InitTEST_Username")
+                .fcmToken("InitTEST_FcmToken")
+                .kakaoAccessToken("InitTEST_AccessToken")
+                .kakaoRefreshToken("InitTEST_RefreshToken")
+                .nickname("InitTEST_Nickname")
+                .profile_photo("InitTEST_ProfileImage")
                 .build();
+
+        UserInfo inputUserInfo = this.modelMapper.map(userInfodto,UserInfo.class);
+
+        this.userInfoService.saveUserInfo(inputUserInfo);
+
+
 
 
         //When & Then
@@ -222,11 +235,25 @@ public class UserInfoControllerTest extends BaseControllerTest {
                 .andDo(document("createUserInfo",
                         links(
                                 linkWithRel("self").description("현재 링크"),
-                                linkWithRel("getUserInfo").description("유저 정보를 가져오는 링크"),
-                                linkWithRel("updateUserInfo").description("유저 정보를 변경하는 링크"),
+                                linkWithRel("userInfo").description("유저정보 관련 데이터를 가져오는 링크"),
+                                linkWithRel("qrCode").description("쿠폰/스탬프 정보를 변경하는 링크"),
+                                linkWithRel("coupon").description("쿠폰 관련 데이터를 가져오는 링크"),
+                                linkWithRel("stamps").description("스탬프 관련 데이터를 가져오는 링크"),
                                 linkWithRel("profile").description("도큐먼트 링크")
                         ),
                         requestFields(
+                                fieldWithPath("qrid").description("회원 고유 QRCode"),
+                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
+                                fieldWithPath("fcmToken").description("Fcm Token id"),
+                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
+                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
+                                fieldWithPath("password").description("회원 password"),
+                                fieldWithPath("profile_photo").description("회원 프로필 사진"),
+                                fieldWithPath("nickname").description("Kakao 닉네임"),
+                                fieldWithPath("username").description("회원 이름")
+
+                        ),
+                        relaxedResponseFields(
                                 fieldWithPath("qrid").description("회원 고유 QRCode"),
                                 fieldWithPath("id").description("SNS로그인을 위한 Token id"),
                                 fieldWithPath("fcmToken").description("Fcm Token id"),
@@ -239,25 +266,28 @@ public class UserInfoControllerTest extends BaseControllerTest {
                                 fieldWithPath("nickname").description("Kakao 닉네임"),
                                 fieldWithPath("username").description("회원 이름"),
                                 fieldWithPath("roles").description("회원 권한")
-
-                        ),
-                        relaxedResponseFields(
-                                fieldWithPath("qrid").description("회원 고유 QRCode"),
-                                fieldWithPath("id").description("SNS로그인을 위한 Token id"),
-                                fieldWithPath("fcmToken").description("Fcm Token id"),
-                                fieldWithPath("kakaoAccessToken").description("KaKao AccessToken"),
-                                fieldWithPath("kakaoRefreshToken").description("Kakao RefreshToken"),
-                                fieldWithPath("serviceAccessToken").description("Service AccessToken"),
-                                fieldWithPath("serviceRefreshToken").description("Service RefreshToken"),
-                                fieldWithPath("password").description("회원 password"),
-                                fieldWithPath("profile_photo").description("회원 프로필 사진진"),
-                                fieldWithPath("nickname").description("Kakao 닉네"),
-                                fieldWithPath("username").description("회원 이"),
-                                fieldWithPath("roles").description("회원 권한")
                         )
                 ))
 
         ;
+    }
+
+    public String getAccessToken(String username) throws Exception{
+        //Given
+
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(appProperties.getClientId(),appProperties.getClientSecret())) //basic Auth 라는 header를 만듦.
+                .param("username",username) // Token을 만들기 위한 3가지 변수 ( 위에서 고의로 만듦.)
+                .param("password","1234")
+                .param("grant_type","password"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("access_token").exists()
+                );
+
+        var responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        return parser.parseMap(responseBody).get("access_token").toString();
     }
 
 

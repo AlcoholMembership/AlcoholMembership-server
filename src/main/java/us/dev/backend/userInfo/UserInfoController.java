@@ -8,6 +8,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -27,6 +28,7 @@ import us.dev.backend.qrCode.QRCodeRepository;
 import us.dev.backend.stamp.StampController;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
@@ -44,7 +46,6 @@ public class UserInfoController {
 
     @Autowired
     UserInfoRepository userInfoRepository;
-    QRCodeRepository qrCodeRepository;
 
     @Autowired
     KakaoAPI kakaoAPI;
@@ -84,7 +85,7 @@ public class UserInfoController {
 
     /* 안드로이드 로그인으로 회원정보 생성하여 리턴해주기 */
     @PostMapping("/login/app")
-    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
+    public ResponseEntity androidLogin(@RequestBody @Valid UserInfoDto userInfoDto, Errors errors) throws IOException {
         if(errors.hasErrors()) {
             return badRequest(errors);
         }
@@ -96,12 +97,29 @@ public class UserInfoController {
         /* 저장을 한번해야 Oauth2 인증 가능 */
         UserInfo newUserInfo = this.userInfoService.saveUserInfo(userInfo);
 
+        RestTemplate restTemplate;
+        HttpHeaders headers;
+
         /* 자체 Oauth2 인증 */
-        String getOuath2Dto = getOauth2Token(userInfo.getQrid(), userInfo.getPassword());
-        JsonParser jsonParser = new JsonParser();
-        JsonElement jsonElement = jsonParser.parse(getOuath2Dto);
-        String getaccess_Token = jsonElement.getAsJsonObject().get("access_token").getAsString();
-        String getrefrsh_Token = jsonElement.getAsJsonObject().get("refresh_token").getAsString();
+        headers = new HttpHeaders();
+        headers.setBasicAuth(appProperties.getClientId(),appProperties.getClientSecret());
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String,String> parameters = new LinkedMultiValueMap<>();
+        parameters.add("grant_type","password");
+        parameters.add("username",newUserInfo.getQrid());
+        parameters.add("password","1234");
+        HttpEntity<MultiValueMap<String,String>> requestEntity = new HttpEntity<>(parameters,headers);
+
+        //restTemplate = appConfig.customizeRestTemplate();
+        restTemplate = new RestTemplate();
+        String response = restTemplate.postForObject("http://127.0.0.1:8080/oauth/token",requestEntity,String.class);
+        restTemplate.setInterceptors(Arrays.asList(new RestTemplateLoggingRequestInterceptor()));
+
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        String getaccess_Token = parser.parseMap(response).get("access_token").toString();
+        String getrefrsh_Token = parser.parseMap(response).get("refresh_token").toString();
+
 
         /* Token 제대로 읽었는지 확인 */
         if(getaccess_Token == null || getrefrsh_Token == null ) {
@@ -115,12 +133,10 @@ public class UserInfoController {
         /* 마지막으로 최종 저장  */
         this.userInfoRepository.save(newUserInfo);
 
-        //TODO 여기 에러 발생함. NullPoint 뜸, OneToOne 관계도 안됨.
-        //RESTtemplate를 이용할지, 일단 따로 만들어서(save과정만따로) 테스트해봐야할듯
 
         /* 최초 회원정보 생성 시, QRCode 정보 init [Stamp, Coupon = 0] */
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
+        restTemplate = new RestTemplate();
+        headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String initQRCodeURI = "http://127.0.0.1:8080/api/qrCode";
@@ -142,7 +158,7 @@ public class UserInfoController {
 
 
         /* HATEOUS */
-        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class);
+        ControllerLinkBuilder selfLinkBuilder = linkTo(UserInfoController.class).slash("/login/app");
         URI createdUri = selfLinkBuilder.toUri();
 
         UserInfoResource userInfoResource = new UserInfoResource(newUserInfo);
@@ -151,7 +167,7 @@ public class UserInfoController {
         userInfoResource.add(linkTo(StampController.class).withRel("stamps"));
         userInfoResource.add(linkTo(UserInfoController.class).withRel("userInfo"));
 
-        userInfoResource.add(new Link("/docs/index.html#resource-loginAndroid").withRel("profile"));
+        userInfoResource.add(new Link("/docs/index.html#resource-createUserInfo").withRel("profile"));
         return ResponseEntity.created(createdUri).body(userInfoResource);
 
     }
@@ -172,9 +188,7 @@ public class UserInfoController {
 
     /* 회원정보 수정 */
     @PutMapping("/{qrid}")
-    public ResponseEntity updateUserInfo(@PathVariable String qrid,
-                                         @RequestBody @Valid UserInfoDto userInfoDto,
-                                         Errors errors) {
+    public ResponseEntity updateUserInfo(@PathVariable String qrid, @RequestBody @Valid UserInfoDto userInfoDto, Errors errors) {
         Optional<UserInfo> optionalUserInfo = this.userInfoRepository.findById(qrid);
         if(optionalUserInfo.isEmpty()) {
             return ResponseEntity.notFound().build();
