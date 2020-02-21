@@ -24,7 +24,7 @@ public class IndexControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_links.qrCode").exists())
                 .andExpect(jsonPath("_links.stamps").exists())
                 .andExpect(jsonPath("_links.userInfo").exists())
-                .andDo(document("index",
+                .andDo(document("indexAddr",
                         links(
                                 linkWithRel("userInfo").description("유저정보 API 링크"),
                                 linkWithRel("qrCode").description("QrCode API 링크"),
@@ -34,5 +34,7 @@ public class IndexControllerTest extends BaseControllerTest {
                         ))
         ;
     }
+
+
 
 }

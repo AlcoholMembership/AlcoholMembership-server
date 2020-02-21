@@ -58,7 +58,7 @@ Build by "Jayas", "Leeshinil";
 
 | `404 Not Found`
 | 요청한 리소스가 없음.
-|===
+|=== 
 
 
 [[overview-hypermedia]]
@@ -81,7 +81,7 @@ Build by "Jayas", "Leeshinil";
 
 `GET` 요청을 사용하여 우리가 서비스하는 API들의 인덱스에 접근할 수 있다.
 
-operation::index[snippets='httpie-request,response-body,http-response,links']
+operation::indexAddr[snippets='httpie-request,response-body,http-response,links']
 
 [[resources-userInfo]]
 == 유저정보
@@ -89,7 +89,7 @@ operation::index[snippets='httpie-request,response-body,http-response,links']
 유저정보는 유저정보를 만들거나 조회할 때 사용한다.
 
 
-[[resources-put-userInfo]]
+[[resources-create-userInfo]]
 === 유저정보 생성
 
 `POST` 요청을 사용해서 새 유저정보를 만들 수 있다.
