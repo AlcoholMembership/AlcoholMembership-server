@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.Min;
 
 @Builder
 @AllArgsConstructor
@@ -22,4 +23,5 @@ public class QRCode {
     private String qrid;
     private Integer coupon_cnt;
     private Integer stamp_cnt;
+
 }

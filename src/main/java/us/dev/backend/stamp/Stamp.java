@@ -22,4 +22,6 @@ public class Stamp {
     private String qrid;
     private LocalDateTime saveTime;
     private String location;
+
+
 }

@@ -16,12 +16,12 @@ public class JasycriptInfo {
         //TODO ClientSecret, ClientId, OauthTokenURL등 숨겨야함. (예정)
     */
 
-    //@Value("${DBPATH}")
+    @Value("${DBPATH}")
     private String dbPath;
 
-    //@Value("${DBUSER}")
+    @Value("${DBUSER}")
     private String dbUser;
 
-    //@Value("${DBPWD}")
+    @Value("${DBPWD}")
     private String dbPwd;
 }

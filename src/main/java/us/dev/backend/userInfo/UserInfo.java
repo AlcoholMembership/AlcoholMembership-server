@@ -1,6 +1,8 @@
 package us.dev.backend.userInfo;
 
 import lombok.*;
+import us.dev.backend.qrCode.QRCode;
+import us.dev.backend.stamp.Stamp;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -41,4 +43,6 @@ public class UserInfo {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
+
+
 }
