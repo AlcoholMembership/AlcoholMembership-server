@@ -58,7 +58,7 @@ Build by "Jayas", "Leeshinil";
 
 | `404 Not Found`
 | 요청한 리소스가 없음.
-|===
+|=== 
 
 
 [[overview-hypermedia]]
